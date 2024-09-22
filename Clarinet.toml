@@ -1,0 +1,22 @@
+[project]
+name = "deTicketing"
+authors = ["Muritadhor Arowolo"]
+description = "a decentralized event management and ticketing system built on the Stacks blockchain using Clarity smart contracts. It allows event organizers to create events, sell tickets, transfer ticket ownership, and issue refunds, all while maintaining a transparent and tamper-proof ledger of events and tickets."
+telemetry = true
+requirements = []
+[contracts.deTicketing]
+path = "contracts/deTicketing.clar"
+depends_on = []
+
+[repl]
+costs_version = 2
+parser_version = 2
+
+[repl.analysis]
+passes = ["check_checker"]
+
+[repl.analysis.check_checker]
+strict = false
+trusted_sender = false
+trusted_caller = false
+callee_filter = false
