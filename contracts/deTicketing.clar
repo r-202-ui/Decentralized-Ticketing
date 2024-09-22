@@ -127,3 +127,27 @@
     )
   )
 )
+
+;; Ticket transfer
+;; Allows the owner of a ticket to transfer it to another user.
+;; Validates the `ticket-id` and ensures that the current owner is the sender of the transaction.
+(define-public (transfer-ticket (ticket-id uint) (new-owner principal))
+  (begin
+    ;; Validate ticket-id
+    (asserts! (is-some (map-get? tickets {ticket-id: ticket-id})) (err u12))
+    (let (
+      (ticket (unwrap! (map-get? tickets {ticket-id: ticket-id}) (err u3)))
+      (ticket-owner (get owner ticket))
+    )
+      ;; Ensure the sender owns the ticket
+      (asserts! (is-eq tx-sender ticket-owner) (err u4))
+
+      ;; Transfer the ticket ownership
+      ;; #[allow(unchecked_data)]
+      (map-set tickets {ticket-id: ticket-id}
+        (merge ticket {owner: new-owner})
+      )
+      (ok true)
+    )
+  )
+)
