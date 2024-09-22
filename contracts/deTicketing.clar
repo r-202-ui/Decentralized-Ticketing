@@ -151,3 +151,40 @@
     )
   )
 )
+
+
+;; Ticket refund
+;; Allows the event organizer to refund a ticket, returning the STX to the ticket owner.
+;; Deletes the ticket and increases the number of remaining tickets for the event.
+(define-public (refund-ticket (ticket-id uint))
+  (begin
+    ;; Validate ticket-id
+    (asserts! (is-some (map-get? tickets {ticket-id: ticket-id})) (err u13))
+    (let (
+      (ticket (unwrap! (map-get? tickets {ticket-id: ticket-id}) (err u5)))
+      (event-id (get event-id ticket))
+      (event (unwrap! (map-get? events {event-id: event-id}) (err u6)))
+      (organizer (get organizer event))
+      (price (get price event))
+      (ticket-owner (get owner ticket))
+      (tickets-remaining (get tickets-remaining event))
+    )
+      ;; Ensure the organizer is initiating the refund
+      (asserts! (is-eq tx-sender organizer) (err u7))
+
+      ;; Refund the ticket price to the ticket owner
+      (try! (stx-transfer? price tx-sender ticket-owner))
+
+      ;; Remove the ticket from the records
+      ;; #[allow(unchecked_data)]
+      (map-delete tickets {ticket-id: ticket-id})
+
+      ;; Increase the tickets-remaining count
+      (map-set events {event-id: event-id}
+        (merge event {tickets-remaining: (+ tickets-remaining u1)})
+      )
+
+      (ok true)
+    )
+  )
+)
